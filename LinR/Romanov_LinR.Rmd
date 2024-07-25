@@ -1,0 +1,66 @@
+---
+title: "LinR"
+author: "Romanov_B21_503"
+date: "25 11 2023"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+```
+
+
+```{r}
+setwd("D:/Labs/Data Science/LinR")
+df <- read.csv("zeta.csv", header = TRUE)
+df <- subset(df, sex =='F')
+df$sex <- NULL
+df$zcta <- NULL
+```
+
+```{r}
+df <- subset(df, 8 < meaneducation & meaneducation < 18 & 10000 < meanhouseholdincome & meanhouseholdincome < 200000 & 0 < meanemployment & meanemployment < 3 & 20 < meanage & meanage < 60)
+```
+
+```{r}
+df["log_income"] = log10(df["meanhouseholdincome"])
+colnames(df) <- c("X", "age", "education", "employment", "meanhouseholdincome", "log_income")
+nrow(df)
+```
+
+```{r}
+ggplot(data=df, aes(x=df$age, y=df$log_income)) + geom_point()
+ggplot(data=df, aes(x=df$education, y=df$log_income)) + geom_point()
+```
+
+```{r}
+m1 <- lm(df$log_income ~ df$age)
+print(m1)
+str(m1)
+par(mfrow=c(2,2))
+plot(m1)
+print(summary(m1))
+```
+
+```{r}
+m2 <- lm(df$log_income ~ df$education)
+print(m2)
+par(mfrow=c(2,2))
+plot(m2)
+print(summary(m2))
+```
+
+```{r}
+m3 <- lm(formula = df$log_income ~ df$age + df$education + df$employment)
+par(mfrow=c(2,2))
+plot(m3)
+print(summary(m3))
+```
+
+```{r}
+pred <- predict(m3)
+par(mfrow=c(1,1))
+plot(df$log_income, df$log_income, type="l", xlab="true income", ylab="predicted income")
+points(df$log_income, pred)
+```
+

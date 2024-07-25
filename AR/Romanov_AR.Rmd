@@ -1,0 +1,77 @@
+---
+title: "AR"
+author: "Romanov_B21_503"
+date: "19 11 2023"
+output: html_document
+---
+
+```{r}
+#install.packages("arules")
+#install.packages("arulesViz")
+library(arules)
+library(arulesViz)
+```
+
+```{r}
+setwd("D:/Labs/Data Science/AR")
+df <- read.transactions("AssociationRules.csv", rm.duplicates = FALSE, header = FALSE, format = "basket", sep = " ", cols = NULL)
+df
+image(head(df, 20))
+```
+
+```{r}
+itemFrequencyPlot(df, topN = 10)
+summary(df)
+```
+
+```{r}
+rules <- apriori(df, parameter = list(supp = 0.01, conf = 0.0, target = "rules"))
+rules
+rules <- apriori(df, parameter = list(supp = 0.01, conf = 0.5, target = "rules"))
+rules
+```
+
+```{r}
+plot(rules, control = list(jitter =2))
+```
+
+```{r}
+plot(rules, method= "scatterplot", c("support","lift"), shading = "confidence", control=list(max=2000, jitter=2), engine = 'plotly')
+```
+
+```{r}
+subrules <- rules[quality(rules)$confidence > 0.8]
+plot(subrules, control = list(jitter = 2))
+inspect(subrules)
+```
+
+```{r}
+rules_lift <- tail(sort(subrules, by = "lift"), 10)
+inspect(rules_lift)
+plot(rules_lift, method= "scatterplot", c("support","lift"), shading = "confidence", engine = 'plotly')
+```
+
+```{r}
+plot(subrules, method = "matrix", measure = c("confidence","lift"), engine = "grid", shading = c("lift","confidence"))
+inspect(subrules)
+```
+
+```{r}
+train <- head(df, 8000)
+test <- tail(df, 2000)
+train_rules <-apriori(train, parameter = list(supp = 0.01, conf = 0,target = "rules"))
+test_rules <-apriori(test, parameter = list(supp = 0.01, conf = 0,target = "rules"))
+```
+
+```{r}
+i <- intersect(train_rules, test_rules)
+inspect(train_rules)
+inspect(test_rules)
+inspect(i)
+```
+
+```{r}
+highest <- head(sort(rules, by="lift"), 3)
+inspect(highest)
+plot(highest, method="graph", engine='igraph')
+```

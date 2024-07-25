@@ -1,0 +1,30 @@
+```{r}
+library(ggplot2)
+```
+
+```{r}
+data <- read.table("D:/Downloads/hyper.mephi.ru_assets_courseware_v1_94f633ca057a1aa84db0364cf4bfa81d_asset-v1_MEPhIx+CS712DS+2023Fall+type@asset+block_zipIncome.txt", sep='|', nrows=32038, header = TRUE)
+summary(data)
+head(data)
+```
+
+```{r}
+colnames(data) <- c("zipCode", "income")
+summary(data)
+boxplot(data$income ~ as.factor(data$zipCode), main = "Average Household Income by Zip Code", xlab = "Zip Codes", ylab = "Income")
+```
+
+```{r}
+f <- subset(data, 200000 > data$income & 7000 < data$income)
+head(f)
+```
+
+```{r}
+boxplot(f$income ~ as.factor(f$zipCode), main = "Average Household Income by Zip Code", xlab = "Zip Codes", ylab = "Income", log="y")
+```
+
+```{r}
+gg <- ggplot(f, aes(as.factor(zipCode), income))
+gg + geom_point(position="jitter", alpha = 0.2) + scale_y_log10()
+gg + geom_point(aes(colour=factor(zipCode)), position="jitter", alpha=0.5) + scale_y_log10() + geom_boxplot(alpha=0.1, outlier.size=-Inf) + labs(color="Region")
+```

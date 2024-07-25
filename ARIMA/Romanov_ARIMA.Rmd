@@ -1,0 +1,84 @@
+---
+title: "ARIMA"
+author: "Romanov_B21_503"
+date: "10 12 2023"
+output: html_document
+---
+
+```{r}
+setwd("D:/Labs/Data Science/ARIMA")
+df <- read.table("jj.dat")
+colnames(df) <- c("EPS")
+```
+
+```{r}
+#ggplot(df, mapping = aes(x = row, y = V1)) + geom_point()
+plot(x = row.names(df), y = df$EPS, type = "l", main = "Source", xlab = "Quarter", ylab = "EPS")
+```
+
+```{r}
+#par(mfrow=c(2,1))
+acf(df)
+pacf(df)
+```
+
+```{r}
+stat_df <- data.frame(diff(df$EPS))
+plot(x = row.names(stat_df), y = stat_df$diff.df.EPS., type = "l", main = "Stationary", xlab = "Quarter", ylab = "EPS")
+```
+
+```{r}
+log_df <- data.frame(log10(df$EPS))
+colnames(log_df) <- c("Log10(EPS)")
+plot(x = row.names(log_df), y = log_df$`Log10(EPS)`, type = "l", main = "Log of EPS", xlab = "Quarter", ylab = "Log10(EPS)")
+```
+
+```{r}
+stat_log_df <- data.frame(diff(log_df$`Log10(EPS)`))
+plot(x = row.names(stat_log_df), y = stat_log_df$diff.log_df..Log10.EPS..., type = "l", main = "Log of EPS Stationary", xlab = "Quarter", ylab = "Log10(EPS)")
+```
+
+```{r}
+acf(stat_log_df)
+pacf(stat_log_df)
+```
+
+```{r}
+df.fit <- arima(df, order = c(1, 1, 0), seasonal = list(order = c(1, 1, 0), period = 4), include.mean = FALSE)
+#df.fit
+```
+
+```{r}
+df.predict <- predict(df.fit, n.ahead = 12)
+plot(x = 1:length(df.predict$pred), y = df.predict$pred, type = "l", main = "Predicted", xlab = "Quarter", ylab = "EPS")
+```
+
+```{r}
+log_df.fit <- arima(log_df, order = c(1, 1, 0), seasonal = list(order = c(1, 1, 0), period = 4), include.mean = FALSE)
+#log_df.fit
+```
+
+```{r}
+log_df.predict <- predict(log_df.fit, n.ahead = 12)
+plot(x = 1:length(log_df.predict$pred), y = log_df.predict$pred, type = "l", main = "Predicted", xlab = "Quarter", ylab = "EPS")
+```
+
+```{r}
+ts.sim_AR4 <- arima.sim(n = 10000, list(ar = c(0.9, -0.5, .2, -.3)))
+plot(ts.sim_AR4, type = "l")
+```
+
+```{r}
+acf(ts.sim_AR4)
+pacf(ts.sim_AR4)
+```
+
+```{r}
+sim_MA4 <- arima.sim(n = 10000, list( ma = c(-1.9, 1.7, -1.5, 1.5)))
+plot(sim_MA4, type = "l")
+```
+
+```{r}
+acf(sim_MA4)
+pacf(sim_MA4)
+```

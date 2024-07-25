@@ -1,0 +1,67 @@
+```{r}
+#install.packages("factoextra")
+#install.packages("maps")
+#install.packages("cluster")
+library(factoextra)
+library(maps)
+library(cluster)
+```
+
+
+```{r}
+k <- 10
+km <- kmeans(income_elec_state, centers=k)
+fviz_cluster(km, income_elec_state, main = "nstart = 1")
+km <- kmeans(income_elec_state, centers=k, nstart=25)
+fviz_cluster(km, income_elec_state, main = "nstart = 25")
+#plot(income_elec_state, col=km$cluster)
+```
+
+```{r}
+fviz_nbclust(income_elec_state, kmeans, method = "wss")
+```
+
+```{r}
+k <- 5
+km <- kmeans(income_elec_state, centers=k, nstart=25)
+df <- data.frame(log10(income_elec_state$income), log10(income_elec_state$elec))
+km <- kmeans(df, centers=k)
+row.names(df) <- row.names(income_elec_state)
+fviz_cluster(km, df)
+```
+
+```{r}
+df <- df[!(row.names(df) %in% "PR"),]
+km <- kmeans(df, centers=k)
+fviz_cluster(km, df)
+```
+
+```{r}
+fviz_nbclust(df, kmeans, method = "wss")
+fviz_gap_stat(clusGap(df, kmeans, K.max = 10, nstart=25))
+k <- 4
+km <- kmeans(df, centers=k)
+fviz_cluster(km, df)
+```
+
+```{r}
+map_order <- c('AL', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL',
+'GA', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME',
+'MD', 'MA', 'MA', 'MA', 'MI', 'MI', 'MN', 'MS', 'MO',
+'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NY', 'NY',
+'NY', 'NC', 'NC', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA',
+'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'VA',
+'VA', 'WA', 'WA', 'WA', 'WA', 'WA', 'WV', 'WI', 'WY')
+map_color <- km$cluster[map_order]
+map('state', col = map_color, fill = TRUE)
+```
+
+```{r}
+df_dist <- dist(df, method = "euclidean")
+CEX <- 0.5
+plot(hclust(df_dist, method = "complete"), cex=CEX)
+plot(hclust(df_dist, method = "single"), cex=CEX)
+plot(hclust(df_dist, method = "average"), cex=CEX)
+plot(hclust(df_dist, method = "median"), cex=CEX)
+plot(hclust(df_dist, method = "centroid"), cex=CEX)
+```

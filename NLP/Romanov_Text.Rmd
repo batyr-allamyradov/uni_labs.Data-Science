@@ -1,0 +1,84 @@
+---
+title: "Text Analysis"
+author: "Romanov_B21_503"
+date: "18 12 2023"
+output: html_document
+---
+
+```{r}
+#install.packages("tm")
+#install.packages("wordcloud")
+library(tm)
+library(wordcloud)
+```
+
+```{r}
+data("crude")
+```
+
+```{r}
+setwd("D:/Labs/Data Science/Text Analysis")
+sw <- read.csv("stop.txt", sep = "|", header = FALSE)
+sw <- sw[1]
+```
+
+$Before:$ Sneaky Fees! Do you carefully read every word on your statement and every notice your bank every sent you? If you've missed one, Yoyodyne Bank is NOT the bank for you! Close all your accounts especially if you're going overseas!!
+
+$Stop$ $words:$ Sneaky Fees! carefully read word statement notice bank sent ? missed , Yoyodyne Bank bank ! Close accounts especially going overseas!!
+
+$Stemming:$ sneaki fee!​do you care read everi word on your statement and everi notic your bank everi sent you? if you'v miss one, yoyodyn bank is not the bank for you! close all your account especi if you'r go oversea
+
+$Both:$ sneaki fee!​care read word statement notic bank sent ?  miss , yoyodyn bank bank ! close  account especi go oversea
+
+$Top$ $10$ $words$ $I$ $chose:$ oil, opec, prices, production, agreement, market, initiative, meeting, world, companies
+
+```{r}
+doc_content <- crude$content$`reut-00002.xml`$content
+doc_corpus <- Corpus(VectorSource(doc_content))
+dtm <- DocumentTermMatrix(doc_corpus)
+```
+
+```{r}
+word_freq <- sort(colSums(as.matrix(dtm)), decreasing = TRUE)
+wordcloud(names(word_freq), word_freq, max.words = 20, scale = c(5, 0.5), colors = brewer.pal(8, "Dark2"))
+```
+
+```{r}
+clean_corpus <- tm_map(doc_corpus, content_transformer(tolower))
+clean_corpus <- tm_map(clean_corpus, removePunctuation)
+clean_corpus <- tm_map(clean_corpus, removeNumbers)
+clean_corpus <- tm_map(clean_corpus, removeWords, stopwords("english"))
+```
+
+```{r}
+clean_dtm <- DocumentTermMatrix(clean_corpus)
+clean_word_freq <- sort(colSums(as.matrix(clean_dtm)), decreasing = TRUE)
+wordcloud(names(clean_word_freq), clean_word_freq, max.words = 20, scale = c(5, 0.5), colors = brewer.pal(8, "Dark2"))
+```
+
+```{r}
+tfidf <- DocumentTermMatrix(crude, control = list(weighting = function(x) weightTfIdf(x, normalize = FALSE), stopwords = FALSE))
+
+tfidf_word_freq <- sort(colSums(as.matrix(tfidf)), decreasing = TRUE)
+doc_tokens <- unlist(strsplit(tolower(doc_content), "\\s+"))
+vector_words <- names(tfidf_word_freq)
+filtered_vector <- tfidf_word_freq[vector_words %in% doc_tokens]
+
+wordcloud(names(filtered_vector), filtered_vector, max.words = 20, scale = c(5, 0.5), colors = brewer.pal(8, "Dark2"))
+```
+
+```{r}
+clean_corpus_2 <- tm_map(crude, content_transformer(tolower))
+clean_corpus_2 <- tm_map(clean_corpus_2, removePunctuation)
+clean_corpus_2 <- tm_map(clean_corpus_2, removeNumbers)
+clean_corpus_2 <- tm_map(clean_corpus_2, removeWords, stopwords("english"))
+
+tfidf <- DocumentTermMatrix(clean_corpus_2, control = list(weighting = function(x) weightTfIdf(x, normalize = FALSE), stopwords = FALSE))
+
+tfidf_word_freq <- sort(colSums(as.matrix(tfidf)), decreasing = TRUE)
+doc_tokens <- unlist(strsplit(tolower(doc_content), "\\s+"))
+vector_words <- names(tfidf_word_freq)
+filtered_vector <- tfidf_word_freq[vector_words %in% doc_tokens]
+
+wordcloud(names(filtered_vector), filtered_vector, max.words = 20, scale = c(4, 0.5), colors = brewer.pal(8, "Dark2"))
+```

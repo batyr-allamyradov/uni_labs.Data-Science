@@ -1,0 +1,45 @@
+---
+title: "LogR"
+author: "Romanov_B21_503"
+date: "02 12 2023"
+output: html_document
+---
+
+```{r}
+setwd("D:/Labs/Data Science/LogR")
+df <- read.csv("survey.csv", header = TRUE, sep = ",")
+```
+
+```{r}
+df["price20"] <- as.integer(df$Price == 20)
+df["price30"] <- as.integer(df$Price == 30)
+```
+
+```{r}
+df$MYDEPV <- as.logical(df$MYDEPV)
+```
+
+```{r}
+logit <- glm(MYDEPV ~ Income + Age + as.factor(Price), data=df, family = binomial(link="logit"), na.action = na.pass)
+summary(logit)
+plot(logit)
+```
+
+```{r}
+e <- exp(1)
+print((e**0.12876 - 1) * 100)
+print((e**-2.21028 - 1) * 100)
+rm(e)
+```
+
+```{r}
+sum(df$MYDEPV)
+pred <- predict(object = logit, newdata = df, type = "response")
+sum(pred)
+```
+
+```{r}
+df2 <- data.frame(Income = 69.509, Age = 100, Price20 = 0, Price30 = 1, Price = 30)
+likehood <- predict(logit, newdata = df2, type = "response")
+likehood
+```

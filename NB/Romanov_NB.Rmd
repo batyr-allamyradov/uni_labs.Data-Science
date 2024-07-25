@@ -1,0 +1,76 @@
+---
+title: "NB"
+author: "Romanov_B21_503"
+date: "02 12 2023"
+output: html_document
+---
+
+```{r}
+#install.packages("e1071")
+#install.packages("caret")
+#install.packages("InformationValue")
+#install.packages("ISLR")
+library(e1071)
+library(caret)
+#library(InformationValue)
+#library(ISLR)
+```
+
+```{r}
+setwd("D:/Labs/Data Science/NB")
+df <- read.csv("nbtrain.csv", header = TRUE, sep = ",")
+```
+
+```{r}
+train <- head(df, 9010)
+test <- tail(df, 1000)
+```
+
+```{r}
+nb <- naiveBayes(formula = train$income ~ ., data = train)
+nb
+```
+
+```{r}
+pred <- predict(object = nb, newdata = test)
+confusionMatrix(pred, as.factor(test$income))
+```
+
+```{r}
+print(paste("Overall: ", 1 - 0.795))
+print(paste(" 10-50K: ", 6 / (6 + 787)))
+print(paste(" 50-80K: ", (5 + 127) / (5 + 127)))
+print(paste(" GT 80K: ", 67 / (67 + 8)))
+```
+
+```{r}
+nb2 <- naiveBayes(formula = train$sex ~ ., data = train)
+nb2
+```
+
+```{r}
+pred2 <- predict(nb2, test)
+confusionMatrix(pred2, as.factor(test$sex))
+```
+
+```{r}
+print(paste("Overall: ", 1 - 0.582))
+print(paste("      F: ", 321 / (321 + 106)))
+print(paste("      M: ", 97 / (97 + 476)))
+```
+
+```{r}
+partM <- subset(df, df$sex == "M")
+partF <- subset(df, df$sex == "F")
+
+df_new <- partM[sample(nrow(partM), 3500), ]
+tmp <- partF[sample(nrow(partF), 3500), ]
+df_new <- rbind(df_new, tmp)
+rm(tmp)
+```
+
+```{r}
+nb_new <- naiveBayes(formula = df_new$income ~ ., data = df_new)
+nb_new
+```
+
